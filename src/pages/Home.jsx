@@ -27,9 +27,14 @@ function Home() {
   const [error, setError] = useState('');
   const [recipe, setRecipe] = useState(null);
   const [copied, setCopied] = useState(false);
-  // const [imageUrl, setImageUrl] = useState(null);
-  // const [imageLoading, setImageLoading] = useState(false);
   const [similarRecipes, setSimilarRecipes] = useState([]);
+  const [showFavorites, setShowFavorites] = useState(false);
+
+  const [favorites, setFavorites] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('tarif-favorileri') ?? '[]'); }
+    catch { return []; }
+  });
+
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme');
     if (saved) return saved === 'dark';
@@ -40,6 +45,10 @@ function Home() {
     document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
     localStorage.setItem('theme', darkMode ? 'dark' : 'light');
   }, [darkMode]);
+
+  useEffect(() => {
+    localStorage.setItem('tarif-favorileri', JSON.stringify(favorites));
+  }, [favorites]);
 
   function handleChange(e) {
     const { name, value, type } = e.target;
@@ -59,8 +68,8 @@ function Home() {
     setLoading(true);
     setError('');
     setRecipe(null);
-    // setImageUrl(null);
     setSimilarRecipes([]);
+    setShowFavorites(false);
 
     try {
       const result = await generateMealSuggestion({
@@ -72,11 +81,6 @@ function Home() {
         targetRecipe,
       });
       setRecipe(result);
-      // setImageLoading(true);
-      // generateFoodImage(result.tarifAdi)
-      //   .then((url) => setImageUrl(url))
-      //   .catch(() => {})
-      //   .finally(() => setImageLoading(false));
       generateSimilarRecipes(result.tarifAdi, form.meal)
         .then((list) => setSimilarRecipes(list))
         .catch(() => {});
@@ -105,114 +109,175 @@ function Home() {
     });
   }
 
+  function toggleFavorite(rec) {
+    setFavorites((prev) =>
+      prev.find((f) => f.tarifAdi === rec.tarifAdi)
+        ? prev.filter((f) => f.tarifAdi !== rec.tarifAdi)
+        : [{ ...rec, _id: Date.now() }, ...prev]
+    );
+  }
+
+  function loadFavorite(fav) {
+    setRecipe(fav);
+    setSimilarRecipes([]);
+    setShowFavorites(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  const isFavorite = recipe && favorites.some((f) => f.tarifAdi === recipe.tarifAdi);
+
   return (
     <main className="home-container">
       <div className="page-header">
         <h1 className="home-title">Tarif Asistanı</h1>
-        <button
-          className="theme-toggle"
-          onClick={() => setDarkMode((d) => !d)}
-          aria-label={darkMode ? 'Açık moda geç' : 'Koyu moda geç'}
-        >
-          {darkMode ? '☀' : '☾'}
-        </button>
+        <div className="header-actions">
+          <button
+            className={`fav-toggle-header${showFavorites ? ' active' : ''}`}
+            onClick={() => setShowFavorites((v) => !v)}
+          >
+            ♥ Favoriler {favorites.length > 0 && <span className="fav-count">{favorites.length}</span>}
+          </button>
+          <button
+            className="theme-toggle"
+            onClick={() => setDarkMode((d) => !d)}
+            aria-label={darkMode ? 'Açık moda geç' : 'Koyu moda geç'}
+          >
+            {darkMode ? '☀' : '☾'}
+          </button>
+        </div>
       </div>
 
-      <form className="meal-form" onSubmit={handleSubmit}>
-        {/* Öğün */}
-        <div className="form-group">
-          <span className="form-label">Öğün</span>
-          <div className="radio-group">
-            {MEAL_OPTIONS.map((option) => (
-              <label key={option} className={`radio-label${form.meal === option ? ' selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="meal"
-                  value={option}
-                  checked={form.meal === option}
-                  onChange={handleChange}
-                />
-                {option}
-              </label>
-            ))}
+      {/* Favoriler paneli */}
+      {showFavorites ? (
+        <div className="favorites-panel">
+          {favorites.length === 0 ? (
+            <p className="favorites-empty">Henüz favori tarif eklemedin.</p>
+          ) : (
+            <div className="favorites-grid">
+              {favorites.map((fav) => (
+                <div key={fav._id} className="fav-card">
+                  <button
+                    className="fav-delete"
+                    onClick={() => setFavorites((p) => p.filter((f) => f._id !== fav._id))}
+                    aria-label="Favoriden kaldır"
+                  >
+                    ×
+                  </button>
+                  <span className="fav-name">{fav.tarifAdi}</span>
+                  <div className="fav-badges">
+                    <span className="badge badge-time">{fav.sure}</span>
+                    <span className={`badge badge-difficulty badge-${fav.zorluk.toLowerCase()}`}>
+                      {fav.zorluk}
+                    </span>
+                    {fav.makrolar && (
+                      <span className="badge badge-time">{fav.makrolar.kalori} kcal</span>
+                    )}
+                  </div>
+                  <button className="fav-load-btn" onClick={() => loadFavorite(fav)}>
+                    Tarifi Göster
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <form className="meal-form" onSubmit={handleSubmit}>
+          {/* Öğün */}
+          <div className="form-group">
+            <span className="form-label">Öğün</span>
+            <div className="radio-group">
+              {MEAL_OPTIONS.map((option) => (
+                <label key={option} className={`radio-label${form.meal === option ? ' selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="meal"
+                    value={option}
+                    checked={form.meal === option}
+                    onChange={handleChange}
+                  />
+                  {option}
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Mutfak ekipmanları */}
-        <div className="form-group">
-          <span className="form-label">Mutfak Ekipmanları</span>
-          <div className="equipment-grid">
-            {EQUIPMENT_OPTIONS.map(({ id, icon }) => {
-              const selected = form.equipment.includes(id);
-              return (
-                <button
-                  key={id}
-                  type="button"
-                  className={`equipment-card${selected ? ' selected' : ''}`}
-                  onClick={() => handleEquipmentToggle(id)}
-                  aria-pressed={selected}
-                >
-                  {selected && <span className="equipment-check">✓</span>}
-                  <span className="equipment-icon">{icon}</span>
-                  <span className="equipment-label">{id}</span>
-                </button>
-              );
-            })}
+          {/* Mutfak ekipmanları */}
+          <div className="form-group">
+            <span className="form-label">Mutfak Ekipmanları</span>
+            <div className="equipment-grid">
+              {EQUIPMENT_OPTIONS.map(({ id, icon }) => {
+                const selected = form.equipment.includes(id);
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`equipment-card${selected ? ' selected' : ''}`}
+                    onClick={() => handleEquipmentToggle(id)}
+                    aria-pressed={selected}
+                  >
+                    {selected && <span className="equipment-check">✓</span>}
+                    <span className="equipment-icon">{icon}</span>
+                    <span className="equipment-label">{id}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <span className="input-hint">Seçilmezse ekipman kısıtlaması uygulanmaz</span>
           </div>
-          <span className="input-hint">Seçilmezse ekipman kısıtlaması uygulanmaz</span>
-        </div>
 
-        {/* Evdeki malzemeler */}
-        <div className="form-group">
-          <label htmlFor="availableIngredients">Evdeki Malzemeler</label>
-          <textarea
-            id="availableIngredients"
-            name="availableIngredients"
-            placeholder="ör. yumurta, domates, soğan, zeytinyağı"
-            value={form.availableIngredients}
-            onChange={handleChange}
-            rows={3}
-          />
-          <span className="input-hint">Virgülle ayırarak yazın</span>
-        </div>
-
-        {/* Ruh hali */}
-        <div className="form-group">
-          <label htmlFor="mood">Bugün nasıl hissediyorsun?</label>
-          <textarea
-            id="mood"
-            name="mood"
-            placeholder="Örnek: İşten geldim yorgunum, pratik bir şey istiyorum. Tava kullanmak istemiyorum."
-            value={form.mood}
-            onChange={handleChange}
-            rows={3}
-          />
-        </div>
-
-        {/* Kalori hedefi */}
-        <div className="form-group">
-          <label htmlFor="kaloriHedefi">Kalori Hedefi</label>
-          <div className="kalori-input-wrap">
-            <input
-              id="kaloriHedefi"
-              name="kaloriHedefi"
-              type="number"
-              min="500"
-              max="5000"
-              step="50"
-              placeholder="ör. 2000"
-              value={form.kaloriHedefi}
+          {/* Evdeki malzemeler */}
+          <div className="form-group">
+            <label htmlFor="availableIngredients">Evdeki Malzemeler</label>
+            <textarea
+              id="availableIngredients"
+              name="availableIngredients"
+              placeholder="ör. yumurta, domates, soğan, zeytinyağı"
+              value={form.availableIngredients}
               onChange={handleChange}
+              rows={3}
             />
-            <span className="kalori-unit">kcal</span>
+            <span className="input-hint">Virgülle ayırarak yazın</span>
           </div>
-          <span className="input-hint">Bu öğün için üst sınır — boş bırakılırsa kısıtlama uygulanmaz</span>
-        </div>
 
-        <button type="submit" className="submit-btn" disabled={loading}>
-          {loading ? 'Hazırlanıyor...' : 'Tarif Oluştur'}
-        </button>
-      </form>
+          {/* Ruh hali */}
+          <div className="form-group">
+            <label htmlFor="mood">Bugün nasıl hissediyorsun?</label>
+            <textarea
+              id="mood"
+              name="mood"
+              placeholder="Örnek: İşten geldim yorgunum, pratik bir şey istiyorum. Tava kullanmak istemiyorum."
+              value={form.mood}
+              onChange={handleChange}
+              rows={3}
+            />
+          </div>
+
+          {/* Kalori hedefi */}
+          <div className="form-group">
+            <label htmlFor="kaloriHedefi">Kalori Hedefi</label>
+            <div className="kalori-input-wrap">
+              <input
+                id="kaloriHedefi"
+                name="kaloriHedefi"
+                type="number"
+                min="500"
+                max="5000"
+                step="50"
+                placeholder="ör. 800"
+                value={form.kaloriHedefi}
+                onChange={handleChange}
+              />
+              <span className="kalori-unit">kcal</span>
+            </div>
+            <span className="input-hint">Bu öğün için üst sınır — boş bırakılırsa kısıtlama uygulanmaz</span>
+          </div>
+
+          <button type="submit" className="submit-btn" disabled={loading}>
+            {loading ? 'Hazırlanıyor...' : 'Tarif Oluştur'}
+          </button>
+        </form>
+      )}
 
       {/* Loading */}
       {loading && (
@@ -232,9 +297,18 @@ function Home() {
       {/* Recipe result */}
       {recipe && (
         <section className="results">
-          {/* Title + badges */}
+          {/* Title + badges + fav button */}
           <div className="recipe-header">
-            <h2 className="recipe-title">{recipe.tarifAdi}</h2>
+            <div className="recipe-title-row">
+              <h2 className="recipe-title">{recipe.tarifAdi}</h2>
+              <button
+                className={`fav-btn${isFavorite ? ' active' : ''}`}
+                onClick={() => toggleFavorite(recipe)}
+                aria-label={isFavorite ? 'Favoriden çıkar' : 'Favoriye ekle'}
+              >
+                {isFavorite ? '♥' : '♡'}
+              </button>
+            </div>
             <div className="recipe-badges">
               <span className="badge badge-time">{recipe.sure}</span>
               <span className={`badge badge-difficulty badge-${recipe.zorluk.toLowerCase()}`}>
@@ -270,11 +344,7 @@ function Home() {
             <div className="recipe-image-wrap">
               {imageLoading && <div className="recipe-image-skeleton" />}
               {imageUrl && (
-                <img
-                  className="recipe-image"
-                  src={imageUrl}
-                  alt={recipe.tarifAdi}
-                />
+                <img className="recipe-image" src={imageUrl} alt={recipe.tarifAdi} />
               )}
             </div>
           )}

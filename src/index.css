@@ -80,6 +80,175 @@ body {
   margin-bottom: 32px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Favoriler header butonu */
+.fav-toggle-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border-input);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.fav-toggle-header:hover,
+.fav-toggle-header.active {
+  border-color: #e8537a;
+  color: #e8537a;
+  background: #fff0f3;
+}
+
+[data-theme='dark'] .fav-toggle-header:hover,
+[data-theme='dark'] .fav-toggle-header.active {
+  background: #2d1520;
+}
+
+.fav-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 10px;
+  background: #e8537a;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* Favoriler paneli */
+.favorites-panel {
+  width: 100%;
+  max-width: 640px;
+}
+
+.favorites-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-top: 32px;
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.fav-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 2px 6px var(--shadow-xs);
+}
+
+.fav-delete {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fav-delete:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+[data-theme='dark'] .fav-delete:hover {
+  background: #2d1515;
+  color: #f87171;
+}
+
+.fav-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-heading);
+  padding-right: 24px;
+  line-height: 1.3;
+}
+
+.fav-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fav-load-btn {
+  margin-top: auto;
+  padding: 8px 0;
+  background: var(--primary-bg);
+  color: var(--primary);
+  border: 1px solid var(--primary-border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.fav-load-btn:hover {
+  background: var(--primary-border);
+}
+
+/* Tarif başlığındaki kalp butonu */
+.recipe-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.fav-btn {
+  flex-shrink: 0;
+  margin-top: 4px;
+  font-size: 1.5rem;
+  line-height: 1;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.15s, transform 0.1s;
+  padding: 0;
+}
+
+.fav-btn:hover {
+  color: #e8537a;
+  transform: scale(1.15);
+}
+
+.fav-btn.active {
+  color: #e8537a;
+}
+
 .home-title {
   font-size: 2rem;
   font-weight: 700;
