@@ -492,3 +492,124 @@ body {
   color: #374151;
   line-height: 1.5;
 }
+
+/* Macros */
+.macros-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.macro-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 8px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+}
+
+.macro-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.macro-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.macro-kalori  { background: #fff7ed; border-color: #fed7aa; color: #c2410c; }
+.macro-protein { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
+.macro-karb    { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+.macro-yag     { background: #faf5ff; border-color: #e9d5ff; color: #7e22ce; }
+
+/* Similar recipes */
+.similar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.similar-section .section-title {
+  margin-bottom: 0;
+}
+
+.similar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.similar-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+
+.similar-card:hover {
+  border-color: #4f7df3;
+  background: #f0f4ff;
+}
+
+.similar-card:active {
+  transform: scale(0.97);
+}
+
+.similar-card:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.similar-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.similar-desc {
+  font-size: 0.8rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Re-roll */
+.reroll-section {
+  display: flex;
+  justify-content: center;
+}
+
+.reroll-btn {
+  padding: 11px 28px;
+  background: #ffffff;
+  color: #6b7280;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.reroll-btn:hover {
+  border-color: #4f7df3;
+  color: #4f7df3;
+  background: #f0f4ff;
+}
+
+.reroll-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

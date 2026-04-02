@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { generateMealSuggestion, generateFoodImage } from '../utils/geminiApi';
+import { generateMealSuggestion, /* generateFoodImage, */ generateSimilarRecipes } from '../utils/geminiApi';
 
 const MEAL_OPTIONS = ['Kahvaltı', 'Öğle Yemeği', 'Akşam Yemeği'];
 const EQUIPMENT_OPTIONS = [
@@ -26,8 +26,9 @@ function Home() {
   const [error, setError] = useState('');
   const [recipe, setRecipe] = useState(null);
   const [copied, setCopied] = useState(false);
-  const [imageUrl, setImageUrl] = useState(null);
-  const [imageLoading, setImageLoading] = useState(false);
+  // const [imageUrl, setImageUrl] = useState(null);
+  // const [imageLoading, setImageLoading] = useState(false);
+  const [similarRecipes, setSimilarRecipes] = useState([]);
 
   function handleChange(e) {
     const { name, value, type } = e.target;
@@ -43,11 +44,12 @@ function Home() {
     }));
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function fetchRecipe({ targetRecipe } = {}) {
     setLoading(true);
     setError('');
     setRecipe(null);
+    // setImageUrl(null);
+    setSimilarRecipes([]);
 
     try {
       const result = await generateMealSuggestion({
@@ -55,19 +57,32 @@ function Home() {
         availableIngredients: form.availableIngredients,
         equipment: form.equipment,
         mood: form.mood,
+        targetRecipe,
       });
-      setImageUrl(null);
-      setImageLoading(true);
       setRecipe(result);
-      generateFoodImage(result.tarifAdi)
-        .then((url) => setImageUrl(url))
-        .catch(() => {})
-        .finally(() => setImageLoading(false));
+      // setImageLoading(true);
+      // generateFoodImage(result.tarifAdi)
+      //   .then((url) => setImageUrl(url))
+      //   .catch(() => {})
+      //   .finally(() => setImageLoading(false));
+      generateSimilarRecipes(result.tarifAdi, form.meal)
+        .then((list) => setSimilarRecipes(list))
+        .catch(() => {});
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleSuggestionClick(name) {
+    fetchRecipe({ targetRecipe: name });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    await fetchRecipe();
   }
 
   function handleCopy() {
@@ -187,7 +202,29 @@ function Home() {
             </div>
           </div>
 
-          {/* AI food image */}
+          {/* Macros */}
+          {recipe.makrolar && (
+            <div className="macros-row">
+              <div className="macro-card macro-kalori">
+                <span className="macro-value">{recipe.makrolar.kalori}</span>
+                <span className="macro-label">kcal</span>
+              </div>
+              <div className="macro-card macro-protein">
+                <span className="macro-value">{recipe.makrolar.protein}g</span>
+                <span className="macro-label">Protein</span>
+              </div>
+              <div className="macro-card macro-karb">
+                <span className="macro-value">{recipe.makrolar.karb}g</span>
+                <span className="macro-label">Karb</span>
+              </div>
+              <div className="macro-card macro-yag">
+                <span className="macro-value">{recipe.makrolar.yag}g</span>
+                <span className="macro-label">Yağ</span>
+              </div>
+            </div>
+          )}
+
+          {/* AI food image — geçici olarak devre dışı
           {(imageLoading || imageUrl) && (
             <div className="recipe-image-wrap">
               {imageLoading && <div className="recipe-image-skeleton" />}
@@ -200,6 +237,7 @@ function Home() {
               )}
             </div>
           )}
+          */}
 
           {/* Ingredients */}
           <div className="recipe-section">
@@ -239,6 +277,33 @@ function Home() {
                   <li key={i}>{item}</li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {/* Re-roll */}
+          <div className="reroll-section">
+            <button className="reroll-btn" onClick={() => fetchRecipe()} disabled={loading}>
+              {loading ? 'Hazırlanıyor...' : 'Beğenmedim, başka öner'}
+            </button>
+          </div>
+
+          {/* Similar recipes */}
+          {similarRecipes.length > 0 && (
+            <div className="similar-section">
+              <h3 className="section-title">Bunu sevdiysen şunu dene</h3>
+              <div className="similar-grid">
+                {similarRecipes.map((s, i) => (
+                  <button
+                    key={i}
+                    className="similar-card"
+                    onClick={() => handleSuggestionClick(s.isim)}
+                    disabled={loading}
+                  >
+                    <span className="similar-name">{s.isim}</span>
+                    <span className="similar-desc">{s.aciklama}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </section>
