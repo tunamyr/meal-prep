@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { generateMealSuggestion, /* generateFoodImage, */ generateSimilarRecipes } from '../utils/geminiApi';
 
 const MEAL_OPTIONS = ['Kahvaltı', 'Öğle Yemeği', 'Akşam Yemeği'];
@@ -30,6 +30,16 @@ function Home() {
   // const [imageUrl, setImageUrl] = useState(null);
   // const [imageLoading, setImageLoading] = useState(false);
   const [similarRecipes, setSimilarRecipes] = useState([]);
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved) return saved === 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   function handleChange(e) {
     const { name, value, type } = e.target;
@@ -97,7 +107,16 @@ function Home() {
 
   return (
     <main className="home-container">
-      <h1 className="home-title">Tarif Asistanı</h1>
+      <div className="page-header">
+        <h1 className="home-title">Tarif Asistanı</h1>
+        <button
+          className="theme-toggle"
+          onClick={() => setDarkMode((d) => !d)}
+          aria-label={darkMode ? 'Açık moda geç' : 'Koyu moda geç'}
+        >
+          {darkMode ? '☀' : '☾'}
+        </button>
+      </div>
 
       <form className="meal-form" onSubmit={handleSubmit}>
         {/* Öğün */}
