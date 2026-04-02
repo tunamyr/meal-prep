@@ -23,7 +23,7 @@ Yapay zeka destekli, kişisel tarif öneri uygulaması. Evdeki malzemeleri, mutf
 ### 1. Repoyu klonla
 
 ```bash
-git clone https://github.com/kullanici-adi/meal-planner.git
+git clone https://github.com/tunamyr/meal-planner.git
 cd meal-planner
 ```
 
@@ -72,9 +72,3 @@ src/
 3. Sahip olduğun mutfak ekipmanlarını seç
 4. İstersen ruh halini veya özel isteğini yaz
 5. **Tarif Oluştur** butonuna bas
-
-## Güvenlik Notu
-
-`.env` dosyası `.gitignore`'a dahildir ve repoya yüklenmez. API anahtarını asla doğrudan koda yazmayın.
-
-> **Not:** Bu uygulama API çağrısını doğrudan tarayıcıdan yapar. Herkese açık bir deployment için API çağrısını bir backend/serverless fonksiyona taşımanız önerilir.
