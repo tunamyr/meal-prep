@@ -1,20 +1,39 @@
 const GEMINI_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
+const MAX_INGREDIENTS_LEN = 400;
+const MAX_MOOD_LEN = 300;
+
+function sanitizeUserInput(str, maxLen) {
+  if (!str || typeof str !== 'string') return '';
+  return str
+    .replace(/[\r\n\t]+/g, ' ')   // newline'ları boşluğa çevir (injection engellemek için)
+    .replace(/\s{2,}/g, ' ')       // ardışık boşlukları birleştir
+    .trim()
+    .slice(0, maxLen);
+}
+
+// En az 3 harf (Türkçe dahil) içermiyorsa geçersiz say
+function hasMinLetters(str, min = 3) {
+  return (str.match(/[a-zA-ZğüşıöçĞÜŞİÖÇ]/g) ?? []).length >= min;
+}
+
 function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe, kaloriHedefi }) {
+  const safeIngredients = sanitizeUserInput(availableIngredients, MAX_INGREDIENTS_LEN);
+  const safeMood       = sanitizeUserInput(mood, MAX_MOOD_LEN);
   const lines = ['Bir kullanıcı için Türkçe yemek tarifi öner.'];
 
   if (targetRecipe) {
     lines.push(`Önereceğin tarif: "${targetRecipe}". Bu tarifi seç ve tam tarifi ver.`);
   }
 
-  if (mood && mood.trim().length > 0) {
-    lines.push(`Kullanıcının notu: "${mood.trim()}" — bunu göz önünde bulundurarak öneri yap.`);
+  if (safeMood.length > 0) {
+    lines.push(`Kullanıcının notu: "${safeMood}" — bunu göz önünde bulundurarak öneri yap.`);
   }
 
-  if (availableIngredients && availableIngredients.trim().length > 0) {
+  if (safeIngredients.length > 0 && hasMinLetters(safeIngredients)) {
     lines.push(
-      `Evdeki malzemeler kullanıcının elinde ne olduğunu gösterir: ${availableIngredients.trim()}. ` +
+      `Evdeki malzemeler kullanıcının elinde ne olduğunu gösterir: ${safeIngredients}. ` +
       'Bunları kullanmak zorunda değilsin — o öğün için en lezzetli ve mantıklı tarifi öner. ' +
       'Eğer birden fazla malzeme birlikte güzel bir yemek oluşturuyorsa kullanabilirsin, ' +
       'ama sırf elimde var diye uyumsuz malzemeleri aynı tarifte birleştirme.'

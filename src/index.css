@@ -332,6 +332,28 @@ body {
   color: var(--text-muted);
 }
 
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.4rem;
+}
+
+.label-row label {
+  margin-bottom: 0;
+}
+
+.char-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  transition: color 0.2s;
+}
+
+.char-count-warn {
+  color: #e8537a;
+  font-weight: 600;
+}
+
 /* Radio buttons (pill style) */
 .radio-group {
   display: flex;

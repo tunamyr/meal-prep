@@ -228,7 +228,12 @@ function Home() {
 
           {/* Evdeki malzemeler */}
           <div className="form-group">
-            <label htmlFor="availableIngredients">Evdeki Malzemeler</label>
+            <div className="label-row">
+              <label htmlFor="availableIngredients">Evdeki Malzemeler</label>
+              <span className={`char-count${form.availableIngredients.length >= 360 ? ' char-count-warn' : ''}`}>
+                {form.availableIngredients.length}/400
+              </span>
+            </div>
             <textarea
               id="availableIngredients"
               name="availableIngredients"
@@ -236,13 +241,19 @@ function Home() {
               value={form.availableIngredients}
               onChange={handleChange}
               rows={3}
+              maxLength={400}
             />
             <span className="input-hint">Virgülle ayırarak yazın</span>
           </div>
 
           {/* Ruh hali */}
           <div className="form-group">
-            <label htmlFor="mood">Bugün nasıl hissediyorsun?</label>
+            <div className="label-row">
+              <label htmlFor="mood">Bugün nasıl hissediyorsun?</label>
+              <span className={`char-count${form.mood.length >= 270 ? ' char-count-warn' : ''}`}>
+                {form.mood.length}/300
+              </span>
+            </div>
             <textarea
               id="mood"
               name="mood"
@@ -250,6 +261,7 @@ function Home() {
               value={form.mood}
               onChange={handleChange}
               rows={3}
+              maxLength={300}
             />
           </div>
 
