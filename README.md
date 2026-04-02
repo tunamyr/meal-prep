@@ -1,16 +1,80 @@
-# React + Vite
+# 🍳 Tarif Asistanı
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Yapay zeka destekli, kişisel tarif öneri uygulaması. Evdeki malzemeleri, mutfak ekipmanlarını ve o anki ruh halini analiz ederek sana özel yemek tarifleri oluşturur.
 
-Currently, two official plugins are available:
+## Özellikler
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Öğün seçimi** — Kahvaltı, Öğle veya Akşam yemeği için ayrı ayrı tarif önerisi
+- **Evdeki malzemeler** — Elindeki malzemeleri gir, tarif onları öncelikli kullansın
+- **Mutfak ekipmanları** — Sadece sahip olduğun ekipmanlarla yapılabilecek tarifler
+- **Ruh hali girişi** — "Yorgunum, pratik bir şey istiyorum" gibi serbest metin destekli akıllı öneri
+- **Akıllı stok tahmini** — Tuz, yağ, baharat gibi temel malzemeler otomatik olarak evde kabul edilir
+- **Alışveriş listesi** — Eksik malzemeleri tek tıkla panoya kopyala
 
-## React Compiler
+## Teknolojiler
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+- [Gemini API](https://ai.google.dev/) (`gemini-2.5-flash-lite`)
+- [Axios](https://axios-http.com/)
+- Vanilla CSS
 
-## Expanding the ESLint configuration
+## Kurulum
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 1. Repoyu klonla
+
+```bash
+git clone https://github.com/kullanici-adi/meal-planner.git
+cd meal-planner
+```
+
+### 2. Bağımlılıkları yükle
+
+```bash
+npm install
+```
+
+### 3. API anahtarını ayarla
+
+Proje kök dizininde bir `.env` dosyası oluştur:
+
+```env
+VITE_GEMINI_API_KEY=senin_api_anahtarin
+```
+
+> Gemini API anahtarı almak için: [Google AI Studio](https://aistudio.google.com/app/apikey)
+
+### 4. Geliştirme sunucusunu başlat
+
+```bash
+npm run dev
+```
+
+Uygulama `http://localhost:5173` adresinde açılır.
+
+## Proje Yapısı
+
+```
+src/
+├── components/        # Yeniden kullanılabilir bileşenler
+├── pages/
+│   └── Home.jsx       # Ana sayfa — form ve tarif sonucu
+├── utils/
+│   └── geminiApi.js   # Gemini API entegrasyonu
+├── App.jsx
+├── main.jsx
+└── index.css
+```
+
+## Kullanım
+
+1. Öğün türünü seç (Kahvaltı / Öğle / Akşam)
+2. Varsa evdeki malzemeleri virgülle ayırarak yaz
+3. Sahip olduğun mutfak ekipmanlarını seç
+4. İstersen ruh halini veya özel isteğini yaz
+5. **Tarif Oluştur** butonuna bas
+
+## Güvenlik Notu
+
+`.env` dosyası `.gitignore`'a dahildir ve repoya yüklenmez. API anahtarını asla doğrudan koda yazmayın.
+
+> **Not:** Bu uygulama API çağrısını doğrudan tarayıcıdan yapar. Herkese açık bir deployment için API çağrısını bir backend/serverless fonksiyona taşımanız önerilir.
