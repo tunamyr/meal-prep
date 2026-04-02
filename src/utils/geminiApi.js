@@ -26,3 +26,4 @@ export async function generateFoodImage(recipeName) {
   const { dataUrl } = await post('/api/image', { recipeName });
   return dataUrl;
 }
+
