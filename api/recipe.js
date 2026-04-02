@@ -1,7 +1,7 @@
 const GEMINI_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent';
 
-function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe }) {
+function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe, kaloriHedefi }) {
   const lines = ['Bir kullanıcı için Türkçe yemek tarifi öner.'];
 
   if (targetRecipe) {
@@ -18,6 +18,13 @@ function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe
       'Bunları kullanmak zorunda değilsin — o öğün için en lezzetli ve mantıklı tarifi öner. ' +
       'Eğer birden fazla malzeme birlikte güzel bir yemek oluşturuyorsa kullanabilirsin, ' +
       'ama sırf elimde var diye uyumsuz malzemeleri aynı tarifte birleştirme.'
+    );
+  }
+
+  if (kaloriHedefi && Number(kaloriHedefi) > 0) {
+    lines.push(
+      `Kalori kısıtı: bu ${meal} tarifi kesinlikle ${kaloriHedefi} kcal'i geçmemeli. ` +
+      `Makrolar alanındaki kalori değeri ${kaloriHedefi} kcal veya altında olsun.`
     );
   }
 

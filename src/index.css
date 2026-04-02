@@ -493,6 +493,36 @@ body {
   line-height: 1.5;
 }
 
+/* Kalori hedefi */
+.kalori-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kalori-input-wrap input[type='number'] {
+  width: 110px;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #213547;
+  background: #ffffff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.kalori-input-wrap input[type='number']:focus {
+  border-color: #4f7df3;
+}
+
+.kalori-unit {
+  font-size: 0.9rem;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
 /* Macros */
 .macros-row {
   display: grid;

@@ -18,6 +18,7 @@ const initialForm = {
   availableIngredients: '',
   equipment: [],
   mood: '',
+  kaloriHedefi: '',
 };
 
 function Home() {
@@ -32,7 +33,7 @@ function Home() {
 
   function handleChange(e) {
     const { name, value, type } = e.target;
-    setForm((prev) => ({ ...prev, [name]: type === 'number' ? Number(value) : value }));
+    setForm((prev) => ({ ...prev, [name]: type === 'number' && value !== '' ? Number(value) : value }));
   }
 
   function handleEquipmentToggle(id) {
@@ -57,6 +58,7 @@ function Home() {
         availableIngredients: form.availableIngredients,
         equipment: form.equipment,
         mood: form.mood,
+        kaloriHedefi: form.kaloriHedefi,
         targetRecipe,
       });
       setRecipe(result);
@@ -166,6 +168,26 @@ function Home() {
             onChange={handleChange}
             rows={3}
           />
+        </div>
+
+        {/* Kalori hedefi */}
+        <div className="form-group">
+          <label htmlFor="kaloriHedefi">Kalori Hedefi</label>
+          <div className="kalori-input-wrap">
+            <input
+              id="kaloriHedefi"
+              name="kaloriHedefi"
+              type="number"
+              min="500"
+              max="5000"
+              step="50"
+              placeholder="ör. 2000"
+              value={form.kaloriHedefi}
+              onChange={handleChange}
+            />
+            <span className="kalori-unit">kcal</span>
+          </div>
+          <span className="input-hint">Bu öğün için üst sınır — boş bırakılırsa kısıtlama uygulanmaz</span>
         </div>
 
         <button type="submit" className="submit-btn" disabled={loading}>
