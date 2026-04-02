@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { generateMealSuggestion } from '../utils/geminiApi';
+import { generateMealSuggestion, generateFoodImage } from '../utils/geminiApi';
 
 const MEAL_OPTIONS = ['Kahvaltı', 'Öğle Yemeği', 'Akşam Yemeği'];
 const EQUIPMENT_OPTIONS = [
@@ -26,6 +26,8 @@ function Home() {
   const [error, setError] = useState('');
   const [recipe, setRecipe] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [imageUrl, setImageUrl] = useState(null);
+  const [imageLoading, setImageLoading] = useState(false);
 
   function handleChange(e) {
     const { name, value, type } = e.target;
@@ -54,7 +56,13 @@ function Home() {
         equipment: form.equipment,
         mood: form.mood,
       });
+      setImageUrl(null);
+      setImageLoading(true);
       setRecipe(result);
+      generateFoodImage(result.tarifAdi)
+        .then((url) => setImageUrl(url))
+        .catch(() => {})
+        .finally(() => setImageLoading(false));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -178,6 +186,20 @@ function Home() {
               </span>
             </div>
           </div>
+
+          {/* AI food image */}
+          {(imageLoading || imageUrl) && (
+            <div className="recipe-image-wrap">
+              {imageLoading && <div className="recipe-image-skeleton" />}
+              {imageUrl && (
+                <img
+                  className="recipe-image"
+                  src={imageUrl}
+                  alt={recipe.tarifAdi}
+                />
+              )}
+            </div>
+          )}
 
           {/* Ingredients */}
           <div className="recipe-section">

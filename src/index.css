@@ -286,6 +286,34 @@ body {
   gap: 24px;
 }
 
+/* Recipe image */
+.recipe-image-wrap {
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f0f4ff;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position:  800px 0; }
+}
+
+.recipe-image-skeleton {
+  width: 100%;
+  height: 260px;
+  background: linear-gradient(90deg, #e8edf5 25%, #d4ddf0 50%, #e8edf5 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+}
+
+.recipe-image {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  display: block;
+}
+
 .recipe-header {
   display: flex;
   flex-direction: column;

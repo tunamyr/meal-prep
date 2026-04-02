@@ -1,8 +1,10 @@
 import axios from 'axios';
 
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const API_URL =
+const RECIPE_URL =
   `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${API_KEY}`;
+const IMAGE_URL =
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${API_KEY}`;
 
 function buildPrompt({ meal, availableIngredients, equipment, mood }) {
   const lines = ['Bir kullanıcı için Türkçe yemek tarifi öner.'];
@@ -12,7 +14,7 @@ function buildPrompt({ meal, availableIngredients, equipment, mood }) {
   }
 
   if (availableIngredients.trim().length > 0) {
-    lines.push(`Evde şu malzemeler var, öncelikli olarak bunları kullan: ${availableIngredients.trim()}`);
+    lines.push(`Evdeki malzemeler kullanıcının elinde ne olduğunu gösterir: ${availableIngredients.trim()}. Bunları kullanmak zorunda değilsin — o öğün için en lezzetli ve mantıklı tarifi öner. Eğer birden fazla malzeme birlikte güzel bir yemek oluşturuyorsa kullanabilirsin, ama sırf elimde var diye uyumsuz malzemeleri aynı tarifte birleştirme.`);
   }
 
   if (equipment.length > 0) {
@@ -40,16 +42,11 @@ function buildPrompt({ meal, availableIngredients, equipment, mood }) {
 
 export async function generateMealSuggestion(formData) {
   try {
-    const response = await axios.post(API_URL, {
-      contents: [
-        {
-          parts: [{ text: buildPrompt(formData) }],
-        },
-      ],
+    const response = await axios.post(RECIPE_URL, {
+      contents: [{ parts: [{ text: buildPrompt(formData) }] }],
     });
 
-    const rawText =
-      response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    const rawText = response.data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!rawText) {
       throw new Error('Gemini API boş yanıt döndürdü.');
@@ -74,4 +71,22 @@ export async function generateMealSuggestion(formData) {
     }
     throw err;
   }
+}
+
+export async function generateFoodImage(recipeName) {
+  const prompt = `${recipeName}, Türk yemeği, profesyonel yemek fotoğrafçılığı, iştah açıcı, doğal ışık, üstten çekim`;
+
+  const response = await axios.post(IMAGE_URL, {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { responseModalities: ['IMAGE', 'TEXT'] },
+  });
+
+  const parts = response.data?.candidates?.[0]?.content?.parts ?? [];
+  const imagePart = parts.find((p) => p.inlineData);
+
+  if (!imagePart) {
+    throw new Error('Görsel üretilemedi.');
+  }
+
+  return `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
 }
