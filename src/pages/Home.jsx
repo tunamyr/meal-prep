@@ -13,12 +13,32 @@ const EQUIPMENT_OPTIONS = [
   { id: 'Wok',               icon: '🥘' },
 ];
 
+const SURE_OPTIONS = [
+  { label: 'Fark etmez', value: '' },
+  { label: '15 dk',      value: '15' },
+  { label: '30 dk',      value: '30' },
+  { label: '45 dk',      value: '45' },
+  { label: '60 dk',      value: '60' },
+];
+
+const ZORLUK_OPTIONS = [
+  { label: 'Fark etmez', value: '' },
+  { label: 'Kolay',      value: 'Kolay' },
+  { label: 'Orta',       value: 'Orta' },
+  { label: 'Zor',        value: 'Zor' },
+];
+
+const HISTORY_KEY = 'tarif-gecmisi';
+const MAX_HISTORY  = 15;
+
 const initialForm = {
   meal: 'Akşam Yemeği',
   availableIngredients: '',
   equipment: [],
   mood: '',
   kaloriHedefi: '',
+  maxSure: '',
+  zorlukFiltresi: '',
 };
 
 function Home() {
@@ -34,6 +54,13 @@ function Home() {
     try { return JSON.parse(localStorage.getItem('tarif-favorileri') ?? '[]'); }
     catch { return []; }
   });
+
+  const [history, setHistory] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY) ?? '[]'); }
+    catch { return []; }
+  });
+
+  const [showHistory, setShowHistory] = useState(false);
 
   const [editingNoteId, setEditingNoteId] = useState(null);
   const [draftNote, setDraftNote] = useState('');
@@ -52,6 +79,10 @@ function Home() {
   useEffect(() => {
     localStorage.setItem('tarif-favorileri', JSON.stringify(favorites));
   }, [favorites]);
+
+  useEffect(() => {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  }, [history]);
 
   function handleChange(e) {
     const { name, value, type } = e.target;
@@ -73,6 +104,7 @@ function Home() {
     setRecipe(null);
     setSimilarRecipes([]);
     setShowFavorites(false);
+    setShowHistory(false);
 
     try {
       const result = await generateMealSuggestion({
@@ -81,9 +113,15 @@ function Home() {
         equipment: form.equipment,
         mood: form.mood,
         kaloriHedefi: form.kaloriHedefi,
+        maxSure: form.maxSure,
+        zorlukFiltresi: form.zorlukFiltresi,
         targetRecipe,
       });
       setRecipe(result);
+      setHistory((prev) => {
+        const filtered = prev.filter((h) => h.tarifAdi !== result.tarifAdi);
+        return [{ ...result, _hid: Date.now() }, ...filtered].slice(0, MAX_HISTORY);
+      });
       generateSimilarRecipes(result.tarifAdi, form.meal)
         .then((list) => setSimilarRecipes(list))
         .catch(() => {});
@@ -153,8 +191,14 @@ function Home() {
         <h1 className="home-title">Tarif Asistanı</h1>
         <div className="header-actions">
           <button
+            className={`fav-toggle-header${showHistory ? ' active' : ''}`}
+            onClick={() => { setShowHistory((v) => !v); setShowFavorites(false); }}
+          >
+            ⏱ Geçmiş {history.length > 0 && <span className="fav-count">{history.length}</span>}
+          </button>
+          <button
             className={`fav-toggle-header${showFavorites ? ' active' : ''}`}
-            onClick={() => setShowFavorites((v) => !v)}
+            onClick={() => { setShowFavorites((v) => !v); setShowHistory(false); }}
           >
             ♥ Favoriler {favorites.length > 0 && <span className="fav-count">{favorites.length}</span>}
           </button>
@@ -167,6 +211,53 @@ function Home() {
           </button>
         </div>
       </div>
+
+      {/* Geçmiş paneli */}
+      {showHistory && (
+        <div className="favorites-panel">
+          {history.length === 0 ? (
+            <p className="favorites-empty">Henüz bir tarif oluşturmadın.</p>
+          ) : (
+            <>
+              <div className="history-header-row">
+                <span className="history-count">{history.length} tarif</span>
+                <button
+                  className="history-clear-btn"
+                  onClick={() => setHistory([])}
+                >
+                  Geçmişi temizle
+                </button>
+              </div>
+              <div className="favorites-grid">
+                {history.map((h) => (
+                  <div key={h._hid} className="fav-card">
+                    <button
+                      className="fav-delete"
+                      onClick={() => setHistory((p) => p.filter((x) => x._hid !== h._hid))}
+                      aria-label="Geçmişten sil"
+                    >
+                      ×
+                    </button>
+                    <span className="fav-name">{h.tarifAdi}</span>
+                    <div className="fav-badges">
+                      <span className="badge badge-time">{h.sure}</span>
+                      <span className={`badge badge-difficulty badge-${h.zorluk.toLowerCase()}`}>
+                        {h.zorluk}
+                      </span>
+                      {h.makrolar && (
+                        <span className="badge badge-time">{h.makrolar.kalori} kcal</span>
+                      )}
+                    </div>
+                    <button className="fav-load-btn" onClick={() => { setRecipe(h); setSimilarRecipes([]); setShowHistory(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
+                      Tarifi Göster
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Favoriler paneli */}
       {showFavorites ? (
@@ -241,7 +332,7 @@ function Home() {
             </div>
           )}
         </div>
-      ) : (
+      ) : !showHistory ? (
         <form className="meal-form" onSubmit={handleSubmit}>
           {/* Öğün */}
           <div className="form-group">
@@ -345,11 +436,49 @@ function Home() {
             <span className="input-hint">Bu öğün için üst sınır — boş bırakılırsa kısıtlama uygulanmaz</span>
           </div>
 
+          {/* Süre filtresi */}
+          <div className="form-group">
+            <span className="form-label">En fazla süre</span>
+            <div className="radio-group">
+              {SURE_OPTIONS.map(({ label, value }) => (
+                <label key={value} className={`radio-label${form.maxSure === value ? ' selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="maxSure"
+                    value={value}
+                    checked={form.maxSure === value}
+                    onChange={handleChange}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Zorluk filtresi */}
+          <div className="form-group">
+            <span className="form-label">Zorluk</span>
+            <div className="radio-group">
+              {ZORLUK_OPTIONS.map(({ label, value }) => (
+                <label key={value} className={`radio-label${form.zorlukFiltresi === value ? ' selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="zorlukFiltresi"
+                    value={value}
+                    checked={form.zorlukFiltresi === value}
+                    onChange={handleChange}
+                  />
+                  {label}
+                </label>
+              ))}
+            </div>
+          </div>
+
           <button type="submit" className="submit-btn" disabled={loading}>
             {loading ? 'Hazırlanıyor...' : 'Tarif Oluştur'}
           </button>
         </form>
-      )}
+      ) : null}
 
       {/* Loading */}
       {loading && (

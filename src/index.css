@@ -925,6 +925,43 @@ body {
   line-height: 1.4;
 }
 
+/* Geçmiş panel başlık satırı */
+.history-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.history-count {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.history-clear-btn {
+  background: none;
+  border: 1px solid var(--border-input);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.history-clear-btn:hover {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+[data-theme='dark'] .history-clear-btn:hover {
+  border-color: #f87171;
+  color: #f87171;
+}
+
 /* Favori not alanı */
 .fav-note-text {
   margin: 0;

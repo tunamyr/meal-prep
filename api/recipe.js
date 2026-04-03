@@ -18,7 +18,7 @@ function hasMinLetters(str, min = 3) {
   return (str.match(/[a-zA-ZğüşıöçĞÜŞİÖÇ]/g) ?? []).length >= min;
 }
 
-function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe, kaloriHedefi }) {
+function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe, kaloriHedefi, maxSure, zorlukFiltresi }) {
   const safeIngredients = sanitizeUserInput(availableIngredients, MAX_INGREDIENTS_LEN);
   const safeMood       = sanitizeUserInput(mood, MAX_MOOD_LEN);
   const lines = ['Bir kullanıcı için Türkçe yemek tarifi öner.'];
@@ -45,6 +45,14 @@ function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe
       `Kalori kısıtı: bu ${meal} tarifi kesinlikle ${kaloriHedefi} kcal'i geçmemeli. ` +
       `Makrolar alanındaki kalori değeri ${kaloriHedefi} kcal veya altında olsun.`
     );
+  }
+
+  if (maxSure && Number(maxSure) > 0) {
+    lines.push(`Süre kısıtı: tarifin toplam hazırlık + pişirme süresi en fazla ${maxSure} dakika olmalı. "sure" alanı ${maxSure} dk veya altında olsun.`);
+  }
+
+  if (zorlukFiltresi && ['Kolay', 'Orta', 'Zor'].includes(zorlukFiltresi)) {
+    lines.push(`Zorluk kısıtı: tarif "${zorlukFiltresi}" zorluk seviyesinde olmalı. "zorluk" alanı tam olarak "${zorlukFiltresi}" olsun.`);
   }
 
   if (equipment && equipment.length > 0) {
