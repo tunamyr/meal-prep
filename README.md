@@ -23,7 +23,7 @@ Yapay zeka destekli, kişisel tarif öneri uygulaması. Evdeki malzemeleri, mutf
 ### 1. Repoyu klonla
 
 ```bash
-git clone https://github.com/tunamyr/meal-planner.git
+git clone https://github.com/tunamyr/meal-prep.git
 cd meal-planner
 ```
 
