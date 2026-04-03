@@ -35,6 +35,9 @@ function Home() {
     catch { return []; }
   });
 
+  const [editingNoteId, setEditingNoteId] = useState(null);
+  const [draftNote, setDraftNote] = useState('');
+
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('theme');
     if (saved) return saved === 'dark';
@@ -109,6 +112,24 @@ function Home() {
     });
   }
 
+  function updateNote(_id, note) {
+    setFavorites((prev) =>
+      prev.map((f) => (f._id === _id ? { ...f, note } : f))
+    );
+    setEditingNoteId(null);
+    setDraftNote('');
+  }
+
+  function startEditingNote(fav) {
+    setEditingNoteId(fav._id);
+    setDraftNote(fav.note ?? '');
+  }
+
+  function cancelEditingNote() {
+    setEditingNoteId(null);
+    setDraftNote('');
+  }
+
   function toggleFavorite(rec) {
     setFavorites((prev) =>
       prev.find((f) => f.tarifAdi === rec.tarifAdi)
@@ -173,6 +194,45 @@ function Home() {
                       <span className="badge badge-time">{fav.makrolar.kalori} kcal</span>
                     )}
                   </div>
+                  {editingNoteId === fav._id ? (
+                    <div className="fav-note-edit">
+                      <textarea
+                        className="fav-note-textarea"
+                        value={draftNote}
+                        onChange={(e) => setDraftNote(e.target.value)}
+                        placeholder="Notunuzu yazın..."
+                        rows={3}
+                        maxLength={300}
+                        autoFocus
+                      />
+                      <div className="fav-note-actions">
+                        <button
+                          className="fav-note-save"
+                          onClick={() => updateNote(fav._id, draftNote)}
+                        >
+                          Kaydet
+                        </button>
+                        <button
+                          className="fav-note-cancel"
+                          onClick={cancelEditingNote}
+                        >
+                          İptal
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {fav.note && (
+                        <p className="fav-note-text">{fav.note}</p>
+                      )}
+                      <button
+                        className="fav-note-btn"
+                        onClick={() => startEditingNote(fav)}
+                      >
+                        {fav.note ? '✏ Notu düzenle' : '+ Not ekle'}
+                      </button>
+                    </>
+                  )}
                   <button className="fav-load-btn" onClick={() => loadFavorite(fav)}>
                     Tarifi Göster
                   </button>

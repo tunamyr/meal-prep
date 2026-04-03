@@ -925,6 +925,102 @@ body {
   line-height: 1.4;
 }
 
+/* Favori not alanı */
+.fav-note-text {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  background: var(--surface-alt);
+  border-radius: 6px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--primary-border);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.fav-note-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: color 0.15s;
+}
+
+.fav-note-btn:hover {
+  color: var(--primary);
+}
+
+.fav-note-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fav-note-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border-input);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  background: var(--surface);
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.fav-note-textarea:focus {
+  border-color: var(--primary);
+}
+
+.fav-note-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.fav-note-save {
+  flex: 1;
+  padding: 6px 0;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.fav-note-save:hover {
+  background: var(--primary-hover);
+}
+
+.fav-note-cancel {
+  padding: 6px 10px;
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+
+.fav-note-cancel:hover {
+  background: var(--border);
+  color: var(--text-primary);
+}
+
 /* Re-roll */
 .reroll-section {
   display: flex;
