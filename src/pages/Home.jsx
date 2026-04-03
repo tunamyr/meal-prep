@@ -168,6 +168,36 @@ function Home() {
     setDraftNote('');
   }
 
+  function formatRecipeText(rec) {
+    const lines = [];
+    lines.push(rec.tarifAdi);
+    lines.push(`Sure: ${rec.sure}  |  Zorluk: ${rec.zorluk}`);
+
+    if (rec.makrolar) {
+      lines.push('');
+      lines.push(`Makrolar (1 porsiyon): ${rec.makrolar.kalori} kcal  |  Protein: ${rec.makrolar.protein}g  |  Karb: ${rec.makrolar.karb}g  |  Yag: ${rec.makrolar.yag}g`);
+    }
+
+    lines.push('');
+    lines.push('Malzemeler:');
+    rec.malzemeler.forEach((m) => lines.push(`- ${m.isim}: ${m.miktar}`));
+
+    lines.push('');
+    lines.push('Yapilis:');
+    rec.yapilis.forEach((step, i) => lines.push(`${i + 1}. ${step}`));
+
+    return lines.join('\n');
+  }
+
+  function handleCopyRecipe() {
+    navigator.clipboard.writeText(formatRecipeText(recipe));
+  }
+
+  function handleWhatsApp() {
+    const text = encodeURIComponent(formatRecipeText(recipe));
+    window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
+  }
+
   function toggleFavorite(rec) {
     setFavorites((prev) =>
       prev.find((f) => f.tarifAdi === rec.tarifAdi)
@@ -591,6 +621,16 @@ function Home() {
               </ul>
             </div>
           )}
+
+          {/* Paylaş */}
+          <div className="share-section">
+            <button className="share-btn share-copy" onClick={handleCopyRecipe}>
+              📋 Metni kopyala
+            </button>
+            <button className="share-btn share-wa" onClick={handleWhatsApp}>
+              💬 WhatsApp'ta paylaş
+            </button>
+          </div>
 
           {/* Re-roll */}
           <div className="reroll-section">
