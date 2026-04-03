@@ -36,7 +36,6 @@ const initialForm = {
   availableIngredients: '',
   equipment: [],
   mood: '',
-  kaloriHedefi: '',
   maxSure: '',
   zorlukFiltresi: '',
 };
@@ -61,6 +60,10 @@ function Home() {
   });
 
   const [showHistory, setShowHistory] = useState(false);
+  const [showMerge, setShowMerge] = useState(false);
+  const [mergeSelected, setMergeSelected] = useState([]);
+  const [mergedList, setMergedList] = useState(null);
+  const [mergedCopied, setMergedCopied] = useState(false);
 
   const [editingNoteId, setEditingNoteId] = useState(null);
   const [draftNote, setDraftNote] = useState('');
@@ -98,13 +101,14 @@ function Home() {
     }));
   }
 
-  async function fetchRecipe({ targetRecipe } = {}) {
+  async function fetchRecipe({ targetRecipe, randomMode } = {}) {
     setLoading(true);
     setError('');
     setRecipe(null);
     setSimilarRecipes([]);
     setShowFavorites(false);
     setShowHistory(false);
+    setShowMerge(false);
 
     try {
       const result = await generateMealSuggestion({
@@ -112,10 +116,10 @@ function Home() {
         availableIngredients: form.availableIngredients,
         equipment: form.equipment,
         mood: form.mood,
-        kaloriHedefi: form.kaloriHedefi,
         maxSure: form.maxSure,
         zorlukFiltresi: form.zorlukFiltresi,
         targetRecipe,
+        randomMode,
       });
       setRecipe(result);
       setHistory((prev) => {
@@ -198,6 +202,46 @@ function Home() {
     window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
   }
 
+  function toggleMergeSelect(uid) {
+    setMergeSelected((prev) =>
+      prev.includes(uid) ? prev.filter((x) => x !== uid) : [...prev, uid]
+    );
+    setMergedList(null);
+  }
+
+  function buildMergedList() {
+    const allRecipes = [
+      ...favorites.map((f) => ({ ...f, _uid: `fav-${f._id}` })),
+      ...history.map((h) => ({ ...h, _uid: `his-${h._hid}` })),
+    ];
+    const selected = allRecipes.filter((r) => mergeSelected.includes(r._uid));
+    const seen = new Set();
+    const combined = [];
+    selected.forEach((rec) => {
+      (rec.alisverisListesi ?? []).forEach((item) => {
+        const key = item.trim().toLowerCase();
+        if (!seen.has(key)) { seen.add(key); combined.push(item.trim()); }
+      });
+    });
+    setMergedList(combined);
+  }
+
+  function handleCopyMerged() {
+    if (!mergedList) return;
+    navigator.clipboard.writeText(mergedList.join('\n')).then(() => {
+      setMergedCopied(true);
+      setTimeout(() => setMergedCopied(false), 2000);
+    });
+  }
+
+  function openMerge() {
+    setShowMerge(true);
+    setShowFavorites(false);
+    setShowHistory(false);
+    setMergeSelected([]);
+    setMergedList(null);
+  }
+
   function toggleFavorite(rec) {
     setFavorites((prev) =>
       prev.find((f) => f.tarifAdi === rec.tarifAdi)
@@ -221,14 +265,29 @@ function Home() {
         <h1 className="home-title">Tarif Asistanı</h1>
         <div className="header-actions">
           <button
+            className="random-btn"
+            disabled={loading}
+            onClick={() => fetchRecipe({ randomMode: true })}
+            aria-label="Rastgele tarif oluştur"
+            title="Rastgele tarif oluştur"
+          >
+            🎲
+          </button>
+          <button
+            className={`fav-toggle-header${showMerge ? ' active' : ''}`}
+            onClick={() => showMerge ? (setShowMerge(false)) : openMerge()}
+          >
+            🛒 Birleştir
+          </button>
+          <button
             className={`fav-toggle-header${showHistory ? ' active' : ''}`}
-            onClick={() => { setShowHistory((v) => !v); setShowFavorites(false); }}
+            onClick={() => { setShowHistory((v) => !v); setShowFavorites(false); setShowMerge(false); }}
           >
             ⏱ Geçmiş {history.length > 0 && <span className="fav-count">{history.length}</span>}
           </button>
           <button
             className={`fav-toggle-header${showFavorites ? ' active' : ''}`}
-            onClick={() => { setShowFavorites((v) => !v); setShowHistory(false); }}
+            onClick={() => { setShowFavorites((v) => !v); setShowHistory(false); setShowMerge(false); }}
           >
             ♥ Favoriler {favorites.length > 0 && <span className="fav-count">{favorites.length}</span>}
           </button>
@@ -241,6 +300,97 @@ function Home() {
           </button>
         </div>
       </div>
+
+      {/* Birleştirme paneli */}
+      {showMerge && (
+        <div className="favorites-panel">
+          {favorites.length === 0 && history.length === 0 ? (
+            <p className="favorites-empty">Favori veya geçmiş tariflerin yok.</p>
+          ) : (
+            <>
+              <p className="merge-hint">Alışveriş listelerini birleştirmek istediğin tarifleri seç:</p>
+              {favorites.length > 0 && (
+                <>
+                  <p className="merge-section-label">Favoriler</p>
+                  <div className="favorites-grid merge-grid">
+                    {favorites.map((f) => {
+                      const uid = `fav-${f._id}`;
+                      const sel = mergeSelected.includes(uid);
+                      return (
+                        <button
+                          key={f._id}
+                          className={`merge-card${sel ? ' selected' : ''}`}
+                          onClick={() => toggleMergeSelect(uid)}
+                        >
+                          {sel && <span className="merge-check">✓</span>}
+                          <span className="fav-name">{f.tarifAdi}</span>
+                          <div className="fav-badges">
+                            <span className="badge badge-time">{f.sure}</span>
+                            <span className={`badge badge-difficulty badge-${f.zorluk.toLowerCase()}`}>{f.zorluk}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+              {history.length > 0 && (
+                <>
+                  <p className="merge-section-label">Geçmiş</p>
+                  <div className="favorites-grid merge-grid">
+                    {history.map((h) => {
+                      const uid = `his-${h._hid}`;
+                      const sel = mergeSelected.includes(uid);
+                      return (
+                        <button
+                          key={h._hid}
+                          className={`merge-card${sel ? ' selected' : ''}`}
+                          onClick={() => toggleMergeSelect(uid)}
+                        >
+                          {sel && <span className="merge-check">✓</span>}
+                          <span className="fav-name">{h.tarifAdi}</span>
+                          <div className="fav-badges">
+                            <span className="badge badge-time">{h.sure}</span>
+                            <span className={`badge badge-difficulty badge-${h.zorluk.toLowerCase()}`}>{h.zorluk}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+              <div className="merge-actions">
+                <button
+                  className="submit-btn"
+                  disabled={mergeSelected.length === 0}
+                  onClick={buildMergedList}
+                >
+                  {mergeSelected.length === 0
+                    ? 'Tarif seç'
+                    : `${mergeSelected.length} tarif birleştir`}
+                </button>
+              </div>
+              {mergedList && (
+                <div className="shopping-section" style={{ marginTop: 20 }}>
+                  <div className="shopping-header">
+                    <h3 className="section-title" style={{ margin: 0 }}>Birleşik Alışveriş Listesi</h3>
+                    <button className="copy-btn" onClick={handleCopyMerged}>
+                      {mergedCopied ? 'Kopyalandı!' : 'Kopyala'}
+                    </button>
+                  </div>
+                  {mergedList.length === 0 ? (
+                    <p className="favorites-empty">Seçilen tariflerin alışveriş listesi boş.</p>
+                  ) : (
+                    <ul className="shopping-list">
+                      {mergedList.map((item, i) => <li key={i}>{item}</li>)}
+                    </ul>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
 
       {/* Geçmiş paneli */}
       {showHistory && (
@@ -362,7 +512,7 @@ function Home() {
             </div>
           )}
         </div>
-      ) : !showHistory ? (
+      ) : !showHistory && !showMerge ? (
         <form className="meal-form" onSubmit={handleSubmit}>
           {/* Öğün */}
           <div className="form-group">
@@ -444,26 +594,6 @@ function Home() {
               rows={3}
               maxLength={300}
             />
-          </div>
-
-          {/* Kalori hedefi */}
-          <div className="form-group">
-            <label htmlFor="kaloriHedefi">Kalori Hedefi</label>
-            <div className="kalori-input-wrap">
-              <input
-                id="kaloriHedefi"
-                name="kaloriHedefi"
-                type="number"
-                min="500"
-                max="5000"
-                step="50"
-                placeholder="ör. 800"
-                value={form.kaloriHedefi}
-                onChange={handleChange}
-              />
-              <span className="kalori-unit">kcal</span>
-            </div>
-            <span className="input-hint">Bu öğün için üst sınır — boş bırakılırsa kısıtlama uygulanmaz</span>
           </div>
 
           {/* Süre filtresi */}
@@ -625,7 +755,7 @@ function Home() {
           {/* Paylaş */}
           <div className="share-section">
             <button className="share-btn share-copy" onClick={handleCopyRecipe}>
-              📋 Metni kopyala
+              📋 Tarifi kopyala
             </button>
             <button className="share-btn share-wa" onClick={handleWhatsApp}>
               💬 WhatsApp'ta paylaş

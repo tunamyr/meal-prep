@@ -925,6 +925,96 @@ body {
   line-height: 1.4;
 }
 
+/* Rastgele tarif (zar) butonu */
+.random-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-input);
+  background: var(--surface);
+  font-size: 1.15rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.random-btn:hover {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  transform: rotate(20deg);
+}
+
+.random-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Alışveriş listesi birleştir */
+.merge-hint {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  margin: 0 0 16px;
+}
+
+.merge-section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 16px 0 8px;
+}
+
+.merge-grid {
+  margin-bottom: 4px;
+}
+
+.merge-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.merge-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+}
+
+.merge-card.selected {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+}
+
+.merge-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.merge-actions {
+  margin-top: 20px;
+}
+
+.merge-actions .submit-btn {
+  width: 100%;
+  margin-top: 0;
+}
+
 /* Geçmiş panel başlık satırı */
 .history-header-row {
   display: flex;

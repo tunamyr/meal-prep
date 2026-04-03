@@ -18,9 +18,35 @@ function hasMinLetters(str, min = 3) {
   return (str.match(/[a-zA-ZğüşıöçĞÜŞİÖÇ]/g) ?? []).length >= min;
 }
 
-function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe, kaloriHedefi, maxSure, zorlukFiltresi }) {
+function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe, maxSure, zorlukFiltresi, randomMode }) {
   const safeIngredients = sanitizeUserInput(availableIngredients, MAX_INGREDIENTS_LEN);
   const safeMood       = sanitizeUserInput(mood, MAX_MOOD_LEN);
+
+  if (randomMode) {
+    const lines = [
+      'Bir kullanıcı için tamamen rastgele, sürpriz bir Türkçe yemek tarifi öner.',
+      'Öğün, malzeme veya ekipman kısıtı yok — tamamen özgür seçim yap.',
+      'Sıradan tarifler yerine biraz farklı veya ilginç bir şey olabilir.',
+      '',
+      'Her malzeme için "evde" alanını false olarak işaretle (evde ne olduğu bilinmiyor).',
+      '"alisverisListesi" tüm malzemeleri içersin.',
+      '',
+      'makrolar alanında tarifin tamamı için tahmini değerleri ver (1 porsiyon):',
+      'Yanıt olarak sadece JSON ver, başka hiçbir şey yazma:',
+      '',
+      JSON.stringify({
+        tarifAdi: '...',
+        malzemeler: [{ isim: '...', miktar: '...', evde: false }],
+        yapilis: ['adım 1', 'adım 2'],
+        sure: '...',
+        zorluk: 'Kolay',
+        alisverisListesi: ['tüm malzemeler'],
+        makrolar: { kalori: 0, protein: 0, karb: 0, yag: 0 },
+      }, null, 2),
+    ];
+    return lines.join('\n');
+  }
+
   const lines = ['Bir kullanıcı için Türkçe yemek tarifi öner.'];
 
   if (targetRecipe) {
@@ -40,12 +66,6 @@ function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe
     );
   }
 
-  if (kaloriHedefi && Number(kaloriHedefi) > 0) {
-    lines.push(
-      `Kalori kısıtı: bu ${meal} tarifi kesinlikle ${kaloriHedefi} kcal'i geçmemeli. ` +
-      `Makrolar alanındaki kalori değeri ${kaloriHedefi} kcal veya altında olsun.`
-    );
-  }
 
   if (maxSure && Number(maxSure) > 0) {
     lines.push(`Süre kısıtı: tarifin toplam hazırlık + pişirme süresi en fazla ${maxSure} dakika olmalı. "sure" alanı ${maxSure} dk veya altında olsun.`);
