@@ -28,8 +28,10 @@ function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe
       'Öğün, malzeme veya ekipman kısıtı yok — tamamen özgür seçim yap.',
       'Sıradan tarifler yerine biraz farklı veya ilginç bir şey olabilir.',
       '',
-      'Her malzeme için "evde" alanını false olarak işaretle (evde ne olduğu bilinmiyor).',
-      '"alisverisListesi" tüm malzemeleri içersin.',
+      'Malzemeleri değerlendirirken şu kuralı uygula: tuz, karabiber, kırmızı pul biber, zeytinyağı, ' +
+      "ayçiçek yağı, sirke, şeker, buğday unu, mısır nişastası gibi temel mutfak staples'ları evde var kabul et ve evde: true işaretle. " +
+      'Diğer tüm malzemeleri (yumurta, süt, tereyağı, yoğurt, peynir, et, tavuk, sebze, meyve vb.) evde: false işaretle.',
+      '"alisverisListesi" yalnızca evde olmayan malzemeleri (evde: false olanları) içersin.',
       '',
       'makrolar alanında tarifin tamamı için tahmini değerleri ver (1 porsiyon):',
       'Yanıt olarak sadece JSON ver, başka hiçbir şey yazma:',
@@ -47,7 +49,9 @@ function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe
     return lines.join('\n');
   }
 
-  const lines = ['Bir kullanıcı için Türkçe yemek tarifi öner.'];
+  const lines = [meal === 'Tatlı'
+    ? 'Bir kullanıcı için Türkçe tatlı tarifi öner. Tatlı olmalı — yemek değil.'
+    : 'Bir kullanıcı için Türkçe yemek tarifi öner.'];
 
   if (targetRecipe) {
     lines.push(`Önereceğin tarif: "${targetRecipe}". Bu tarifi seç ve tam tarifi ver.`);
@@ -87,7 +91,7 @@ function buildPrompt({ meal, availableIngredients, equipment, mood, targetRecipe
   );
   lines.push(
     'Malzemeleri değerlendirirken şu kuralı uygula: tuz, karabiber, kırmızı pul biber, zeytinyağı, ' +
-    "ayçiçek yağı, sirke, şeker, un, nişasta gibi temel mutfak staples'ları kullanıcı belirtmese bile " +
+    "ayçiçek yağı, sirke, şeker, buğday unu, mısır nişastası gibi temel mutfak staples'ları kullanıcı belirtmese bile " +
     'evde var kabul et ve evde: true işaretle. Ancak yumurta, süt, tereyağı, yoğurt, peynir, et, ' +
     'tavuk, sebze, meyve gibi malzemeleri yalnızca kullanıcı açıkça belirttiyse evde: true yap.'
   );

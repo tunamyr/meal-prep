@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { generateMealSuggestion, /* generateFoodImage, */ generateSimilarRecipes } from '../utils/geminiApi';
 
-const MEAL_OPTIONS = ['Kahvaltı', 'Öğle Yemeği', 'Akşam Yemeği'];
+const MEAL_OPTIONS = ['Kahvaltı', 'Öğle Yemeği', 'Akşam Yemeği', 'Tatlı'];
 const EQUIPMENT_OPTIONS = [
   { id: 'Fırın',             icon: '🔥' },
   { id: 'Tava',              icon: '🍳' },
